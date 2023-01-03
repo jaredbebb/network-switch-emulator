@@ -1,14 +1,14 @@
-class PTPMessage():
+class PTPLayer():
     def __init__(self):
         self.messageType = b'\x0b'
         self.versionPtp = b'\x02'
         self.messageLength = b'\x00\x40'
         self.domainNumber = b'\x00'
         self.minorSdoID = b'\x00'
-        self.LI_61 = b'\x00\x04'
+        self.flags = b'\x00\x04'
         self.CorrectionField = b'\x00\x00\x00\x00\x00\x00\x00\x00'
         self.messageTypeSpecific = b'\x00\x00\x00\x00'
-        self.clockIdentity = b'\x00\x0d\xa8\xff\xfe\xf16\xf17\xb1'
+        self.clockIdentity = b'\x00\x0d\xa8\xff\xfe\x16\x17\xb1'
         self.surcePortID = b'\x00\x0a'
         self.sequenceID = b'\x01\x89'
         self.controlField = b'\x05'
@@ -30,7 +30,7 @@ class PTPMessage():
         # TODO: this should be packed struct based on HW architecture endianness see
         # https://docs.python.org/3/library/struct.html#byte-order-size-and-alignment
         message = self.messageType + self.versionPtp + self.messageLength + self.domainNumber + self.minorSdoID + \
-            self.LI_61 + self.CorrectionField + self.messageTypeSpecific + self.clockIdentity + self.surcePortID + \
+            self.flags + self.CorrectionField + self.messageTypeSpecific + self.clockIdentity + self.surcePortID + \
             self.sequenceID + self.controlField + self.logMessagePeriod + self.originTimeStampSeconds + \
             self.originTimeStampNanoSeconds + self.originCurrentUTCOffset + self.PrecisionTimeProtocol + self.priority + \
             self.grandmasterClockClass + self.grandmasterClockAccuracy + self.grandmasterClockVariance + self.priority2 + \
@@ -38,7 +38,30 @@ class PTPMessage():
         return message
 
 
-class PTPAnnounce(PTPMessage):
+class PTPAnnounce(PTPLayer):
     def __init__(self):
         super().__init__()
         self.messageType = b'\x0b'
+        self.messageLength = b'\x00\x40'
+        self.flags = b'\x00\x04'
+        self.controlField = b'\x05'
+
+
+class PTPFollow_Up(PTPLayer):
+    def __init__(self):
+        super().__init__()
+        self.messageType = b'\x08'
+        self.messageLength = b'\x00\x2c'
+        self.flags = b'\x00\x00'
+        self.controlField = b'\x02'
+
+
+class PTPSync(PTPLayer):
+    def __init__(self):
+        super().__init__()
+        self.messageType = b'\x00'
+        self.messageLength = b'\x00\x2c'
+        self.flags = b'\x02\x00'
+        self.controlField = b'\x00'
+
+
